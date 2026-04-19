@@ -1,0 +1,40 @@
+schema: spec-driven
+
+# Project context (optional)
+# This is shown to AI when creating artifacts.
+context: |
+  Repository: aspire-openspec — a .NET Aspire distributed app with OpenSpec (spec-driven) workflow.
+
+  Layout:
+  - AspireApp/AspireApp.AppHost — Aspire orchestrator (Redis + project references, health checks on /health).
+  - AspireApp/AspireApp.ApiService — ASP.NET Core minimal API (OpenAPI in Development), references ServiceDefaults.
+  - AspireApp/AspireApp.Web — Blazor (Razor Components) interactive server UI, HTTP client to apiservice via service discovery (https+http://apiservice), Redis output caching ("cache").
+  - AspireApp/AspireApp.ServiceDefaults — shared Aspire wiring: OpenTelemetry (metrics/trace, OTLP when OTEL_EXPORTER_OTLP_ENDPOINT is set), default health checks, service discovery, HTTP client resilience (AddStandardResilienceHandler).
+  - AspireApp/AspireApp.Tests — xUnit v3 + Aspire.Hosting.Testing + coverlet; integration tests spin up the AppHost.
+
+  Tech stack:
+  - .NET 10 (net10.0), C# language version from the SDK (e.g. collection expressions where used).
+  - .NET Aspire SDK/packages 13.1.0 (AppHost, Redis hosting, StackExchange.Redis output caching, hosting testing).
+  - ASP.NET Core 10 (OpenApi, ProblemDetails, Razor Components, antiforgery, static assets, output cache).
+  - Redis (Aspire resource name "cache").
+  - Observability: OpenTelemetry ASP.NET Core / HTTP / runtime instrumentation; health endpoints /health and /alive (Development only mapping in ServiceDefaults).
+
+  Conventions:
+  - All app projects: ImplicitUsings enable, Nullable enable.
+  - Prefer top-level statements in Program.cs where the template already does; minimal APIs use MapGet/MapGroup patterns; shared cross-cutting code belongs in ServiceDefaults (AddServiceDefaults / MapDefaultEndpoints).
+  - Service-to-service: use AddHttpClient with BaseAddress using Aspire service discovery URIs (e.g. https+http://apiservice).
+  - Tests: Fact/async Task, Arrange-Act-Assert, DistributedApplicationTestingBuilder for AppHost-level integration; respect cancellation tokens from TestContext.Current.CancellationToken when using xUnit v3.
+  - When adding endpoints consumed by Aspire health checks, keep /health (and liveness contract) coherent with AppHost WithHttpHealthCheck paths.
+
+  OpenSpec in this repo: Cursor skills/commands under .cursor/ for propose, explore, apply, archive; changes live under openspec/changes/ when created via openspec CLI.
+
+# Per-artifact rules (optional)
+rules:
+  proposal:
+    - Call out which Aspire project(s) (AppHost, ApiService, Web, ServiceDefaults, Tests) are in scope.
+    - Note any new distributed resources (e.g. Redis, databases) for the AppHost and WithReference/WaitFor patterns.
+  design:
+    - Prefer Aspire-native patterns: AddProject, AddRedis (or other components), WithReference, WaitFor, health checks aligned with /health.
+    - Preserve OpenTelemetry and resilience defaults from ServiceDefaults unless the change explicitly replaces them.
+  tasks:
+    - Order work so AppHost/resources and ServiceDefaults come before services that depend on them; end with tests (Aspire.Hosting.Testing) when behavior changes.
