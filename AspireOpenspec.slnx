@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="Directory.Packages.props" />
+  </Folder>
   <Project Path="AspireApp/AspireApp.ApiService/AspireApp.ApiService.csproj" />
   <Project Path="AspireApp/AspireApp.AppHost/AspireApp.AppHost.csproj" Id="2d231f91-817d-42fe-9578-7b028bfb4cfd" />
   <Project Path="AspireApp/AspireApp.ServiceDefaults/AspireApp.ServiceDefaults.csproj" />
